@@ -52,15 +52,14 @@ async def check_updates():
             await asyncio.sleep(2)
         except Exception as e:
             print(f"Loop 檢查錯誤: {name}, {e}")
-
 # --- 5. 核心：啟動立刻發送一次 ---
 @bot.event
 async def on_ready():
     print(f'✅ 機器人 {bot.user} 已上線！')
     
     for name, info in ACCOUNTS.items():
-                try:
-            # 改成 fetch_channel 加上 await，這會強制去 Discord 伺服器抓取頻道
+        try:
+            # 強制抓取頻道
             channel = await bot.fetch_channel(info["channel"])
             
             feed = feedparser.parse(info["url"])
@@ -68,13 +67,13 @@ async def on_ready():
                 latest_link = feed.entries[0].link
                 last_posts[name] = latest_link
                 
+                # 發送初始訊息
                 await channel.send(f"🚀 **{name}** 自動監控已啟動！\n目前最新內容：\n{latest_link}")
                 print(f"成功發送 {name} 的初始訊息")
         except Exception as e:
-            # 如果還是失敗，Logs 會印出到底是「找不到頻道」還是「權限被擋住」
             print(f"啟動時出錯 ({name}): {e}")
 
-
+    # 啟動循環任務
     if not check_updates.is_running():
         check_updates.start()
 
