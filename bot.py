@@ -29,20 +29,9 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 ACCOUNTS = {
     "APEX 官方推特": {
         "url": "https://x.com/playapex?s=21&t=-czGc9vt-apy4yCbiz_O6Q",
-        "channel": 1488022987046392021  # <--- 修改為頻道 A 的 ID
+        "channel": 1488022987046392021,  # <--- 修改為頻道 A 的 ID
     },
-    "ACAね 個人推特": {
-        "url": "https://rsshub.app/twitter/user/ACAne_04",
-        "channel":   # <--- 修改為頻道 B 的 ID
-    },
-    "ZUTOMAYO YT頻道": {
-        "url": "https://rsshub.app/youtube/channel/UCvSVRNqBWQDnl3_L66L9_FA",
-        "channel":   # <--- 修改為頻道 C 的 ID
-    },
-    "絕區零 B站動態": {
-        "url": "https://rsshub.app/bilibili/user/dynamic/1636034895",
-        "channel":   # <--- 修改為頻道 D 的 ID
-    }
+    
 }
 
 # 紀錄最後發布的連結，防止重複
