@@ -7,7 +7,7 @@ import threading
 import http.server
 import socketserver
 
-# --- 1. 防休眠設定 (Render 24小時在線專用) ---
+# --- 1. 防休眠設定 ---
 def keep_alive():
     class Handler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
@@ -23,58 +23,58 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# --- 3. 【全能監控分流清單】 ---
-# 請在此修改網址與對應的頻道 ID
-# 提示：ID 請長按 Discord 頻道名稱後點選「複製頻道 ID」
+# --- 3. 監控清單 (請確保 ID 正確且後面有逗號) ---
 ACCOUNTS = {
-    "APEX 官方推特": {
-        "url": "https://x.com/playapex?s=21&t=-czGc9vt-apy4yCbiz_O6Q",
-        "channel": 1488022987046392021,  # <--- 修改為頻道 A 的 ID
-    },
-    
+    "Apex 官方推特": {
+        "url": "https://rsshub.app/twitter/user/PlayApex",
+        "channel": 1488022987046392021,
+    }
 }
 
-# 紀錄最後發布的連結，防止重複
+
+# 紀錄最後發布的連結
 last_posts = {name: None for name in ACCOUNTS}
 
+# --- 4. 定時檢查任務 (每 10 分鐘) ---
 @tasks.loop(minutes=10)
 async def check_updates():
     for name, info in ACCOUNTS.items():
         channel = bot.get_channel(info["channel"])
         if not channel:
             continue
-
         try:
             feed = feedparser.parse(info["url"])
             if feed.entries:
-                # 取得最新的一則內容
                 latest_link = feed.entries[0].link
-                
-                # 如果與上次紀錄不同，就發送新訊息
                 if latest_link != last_posts[name]:
-                    if last_posts[name] is not None:
-                        await channel.send(f"📢 **{name}** 更新囉！\n{latest_link}")
+                    await channel.send(f"📢 **{name}** 有新動態！\n{latest_link}")
                     last_posts[name] = latest_link
-            
-            await asyncio.sleep(3) # 避免請求過快
+            await asyncio.sleep(2)
         except Exception as e:
-            print(f"❌ 檢查 {name} 時出錯: {e}")
+            print(f"Loop 檢查錯誤: {name}, {e}")
 
+# --- 5. 核心：啟動立刻發送一次 ---
 @bot.event
 async def on_ready():
-    print(f'✅ 機器人 {bot.user} 已啟動，開始分流監控！')
+    print(f'✅ 機器人 {bot.user} 已上線！')
     
-    # 【啟動測試】一上線立刻在各頻道報到，確認 ID 是否填寫正確
     for name, info in ACCOUNTS.items():
         channel = bot.get_channel(info["channel"])
         if channel:
             try:
+                # 這裡就是關鍵：啟動時立刻抓取並發送
                 feed = feedparser.parse(info["url"])
                 if feed.entries:
-                    last_posts[name] = feed.entries[0].link
-                    await channel.send(f"✅ **{name}** 監控系統已就緒！\n目前最新內容：{last_posts[name]}")
+                    latest_link = feed.entries[0].link
+                    last_posts[name] = latest_link # 更新基準點
+                    
+                    # 測試發送
+                    await channel.send(f"🚀 **{name}** 自動監控已啟動！\n目前最新內容是：\n{latest_link}")
+                    print(f"成功發送 {name} 的初始訊息")
             except Exception as e:
-                print(f"啟動測試失敗: {name}, {e}")
+                print(f"啟動時抓取 {name} 失敗: {e}")
+        else:
+            print(f"❌ 錯誤：找不到頻道 ID {info['channel']}")
 
     if not check_updates.is_running():
         check_updates.start()
@@ -83,6 +83,5 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send(f'🏓 延遲：{round(bot.latency * 1000)}ms')
 
-# 讀取 Token
 token = os.getenv('DISCORD_TOKEN')
 bot.run(token)
