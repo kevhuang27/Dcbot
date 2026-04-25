@@ -59,22 +59,21 @@ async def on_ready():
     print(f'✅ 機器人 {bot.user} 已上線！')
     
     for name, info in ACCOUNTS.items():
-        channel = bot.get_channel(info["channel"])
-        if channel:
-            try:
-                # 這裡就是關鍵：啟動時立刻抓取並發送
-                feed = feedparser.parse(info["url"])
-                if feed.entries:
-                    latest_link = feed.entries[0].link
-                    last_posts[name] = latest_link # 更新基準點
-                    
-                    # 測試發送
-                    await channel.send(f"🚀 **{name}** 自動監控已啟動！\n目前最新內容是：\n{latest_link}")
-                    print(f"成功發送 {name} 的初始訊息")
-            except Exception as e:
-                print(f"啟動時抓取 {name} 失敗: {e}")
-        else:
-            print(f"❌ 錯誤：找不到頻道 ID {info['channel']}")
+                try:
+            # 改成 fetch_channel 加上 await，這會強制去 Discord 伺服器抓取頻道
+            channel = await bot.fetch_channel(info["channel"])
+            
+            feed = feedparser.parse(info["url"])
+            if feed.entries:
+                latest_link = feed.entries[0].link
+                last_posts[name] = latest_link
+                
+                await channel.send(f"🚀 **{name}** 自動監控已啟動！\n目前最新內容：\n{latest_link}")
+                print(f"成功發送 {name} 的初始訊息")
+        except Exception as e:
+            # 如果還是失敗，Logs 會印出到底是「找不到頻道」還是「權限被擋住」
+            print(f"啟動時出錯 ({name}): {e}")
+
 
     if not check_updates.is_running():
         check_updates.start()
