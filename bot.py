@@ -28,7 +28,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # --- 3. 監控清單 (請確保 ID 正確且後面有逗號) ---
 ACCOUNTS = {
     "Apex Reddit": {
-        "url": "https://www.reddit.com/r/apexlegends/new/.rss",
+        "url": "https://www.reddit.com/r/apexlegends/search.rss?q=flair%3A%22Official%20Responded%22&sort=new",
         "channel": 1488022987046392021,
     }
 }
