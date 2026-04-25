@@ -82,4 +82,23 @@ async def ping(ctx):
     await ctx.send(f'🏓 延遲：{round(bot.latency * 1000)}ms')
 
 token = os.getenv('DISCORD_TOKEN')
+@bot.command()
+async def check(ctx):
+    await ctx.send("🔍 開始手動抓取 Apex 最新消息...")
+    for name, info in ACCOUNTS.items():
+        try:
+            # 強制轉換為整數以防萬一
+            target_id = int(info["channel"])
+            channel = await bot.fetch_channel(target_id)
+            
+            feed = feedparser.parse(info["url"])
+            if feed.entries:
+                link = feed.entries[0].link
+                await channel.send(f"✅ 手動抓取成功！\n來源：{name}\n內容：{link}")
+            else:
+                await ctx.send(f"❌ {name} 的 RSS 好像沒內容？")
+        except Exception as e:
+            await ctx.send(f"❌ 抓取失敗，錯誤訊息：{e}")
+
+# 這一行永遠要在最後面
 bot.run(token)
