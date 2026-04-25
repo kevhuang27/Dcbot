@@ -25,7 +25,7 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # 這裡填入你想接收訊息的頻道 ID (在 Discord 頻道按右鍵點「複製頻道 ID」)
-TARGET_CHANNEL_ID = 123456789012345678  # <--- 請換成你的頻道 ID
+TARGET_CHANNEL_ID = 1488022986265989252 # <--- 請換成你的頻道 ID
 
 # 想追蹤的推特 RSS 連結 (這裡以 ZUTOMAYO 為例)
 # 使用 RSSHub 的公共伺服器 (若失效可換其他的)
