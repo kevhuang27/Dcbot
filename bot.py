@@ -25,8 +25,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 # --- 3. 監控清單 (請確保 ID 正確且後面有逗號) ---
 ACCOUNTS = {
-    "Apex 官方推特": {
-        "url": "https://x.com/playapex?s=21&t=-czGc9vt-apy4yCbiz_O6Q",
+    "Apex Reddit": {
+        "url": "https://www.reddit.com/r/apexlegends/new/.rss",
         "channel": 1488022987046392021,
     }
 }
