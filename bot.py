@@ -6,6 +6,8 @@ import asyncio
 import threading
 import http.server
 import socketserver
+import requests
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
 
 # --- 1. 防休眠設定 ---
 def keep_alive():
@@ -84,19 +86,27 @@ async def ping(ctx):
 token = os.getenv('DISCORD_TOKEN')
 @bot.command()
 async def check(ctx):
-    await ctx.send("🔍 開始手動抓取 Apex 最新消息...")
+    await ctx.send("🔍 正在嘗試從來源抓取最新消息...")
     for name, info in ACCOUNTS.items():
         try:
-            # 強制轉換為整數以防萬一
+            # 1. 強制轉換 ID 並抓取頻道
             target_id = int(info["channel"])
             channel = await bot.fetch_channel(target_id)
             
-            feed = feedparser.parse(info["url"])
+            # 2. 使用 requests 戴上「瀏覽器面具」去抓取內容
+            response = requests.get(info["url"], headers=HEADERS, timeout=10)
+            
+            # 3. 解析抓下來的內容
+            feed = feedparser.parse(response.content)
+            
             if feed.entries:
                 link = feed.entries[0].link
-                await channel.send(f"✅ 手動抓取成功！\n來源：{name}\n內容：{link}")
+                title = feed.entries[0].title
+                await channel.send(f"✅ 手動抓取成功！\n來源：{name}\n標題：{title}\n內容：{link}")
             else:
-                await ctx.send(f"❌ {name} 的 RSS 好像沒內容？")
+                # 如果抓不到，印出 HTTP 狀態碼幫助除錯
+                await ctx.send(f"❌ {name} 回傳為空。狀態碼: {response.status_code}")
+                
         except Exception as e:
             await ctx.send(f"❌ 抓取失敗，錯誤訊息：{e}")
 
