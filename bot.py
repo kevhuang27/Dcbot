@@ -27,11 +27,13 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 # --- 3. 監控清單 (請確保 ID 正確且後面有逗號) ---
 ACCOUNTS = {
-    "Apex Reddit": {
-        "url": "https://www.reddit.com/r/apexlegends/search.rss?q=flair%3A%22Official%20Responded%22&sort=new",
+    "Apex 最新消息": {
+        # 直接抓新貼文，這是 Reddit 最穩定的路徑
+        "url": "https://www.reddit.com/r/apexlegends/new/.rss",
         "channel": 1488022987046392021,
     }
 }
+
 
 
 # 紀錄最後發布的連結
